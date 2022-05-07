@@ -2,7 +2,7 @@ import React from 'react';
 import AppViews from './views/AppViews';
 import CreatorViews from './views/CreatorViews';
 import BuyerViews from './views/BuyerViews';
-import PawnBrokerViews from './views/PawnBrokerViews';
+import BrokerViews from './views/BrokerViews';
 import {renderDOM, renderView} from './views/render';
 import './index.css';
 import * as backend from './build/index.main.mjs';
@@ -10,7 +10,7 @@ import {loadStdlib} from '@reach-sh/stdlib';
 // const reach = loadStdlib(process.env);
 
 const reach = loadStdlib({
-  REACH_CONNECTOR_MODE: 'CFX',
+  REACH_CONNECTOR_MODE: 'ALGO',
   REACH_DEBUG: 'yes',
 });
 
@@ -49,7 +49,7 @@ class App extends React.Component {
   async skipFundAccount() { this.setState({view: 'DeployerOrAttacher'}); }
   selectCreator() { this.setState({view: 'Wrapper', ContentView: Creator}); }
   selectBuyer() { this.setState({view: 'Wrapper', ContentView: Buyer}); }
-  selectPawnBroker() { this.setState({view: 'Wrapper', ContentView: PawnBroker}); }
+  selectBroker() { this.setState({view: 'Wrapper', ContentView: Broker}); }
   render() { return renderView(this, AppViews); }
 }
 
@@ -136,7 +136,7 @@ class Buyer extends React.Component {
   render() { return renderView(this, BuyerViews); }
 }
 
-class PawnBroker extends React.Component {
+class Broker extends React.Component {
   constructor(props) {
     super(props);
     this.state = {view: 'Attach'};
@@ -164,7 +164,7 @@ class PawnBroker extends React.Component {
     this.setState({view: 'WaitingForRedeem'});
   }
 
-  render() { return renderView(this, PawnBrokerViews); }
+  render() { return renderView(this, BrokerViews); }
 }
 
 renderDOM(<App />);

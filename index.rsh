@@ -22,7 +22,7 @@ const Buyer = {
 };
 
 // Accept pawn, the day of accept, the total fee to pay
-const PawnBroker = {
+const Broker = {
   accept: Fun([UInt, UInt, UInt, UInt], Null)
 };
 
@@ -39,7 +39,7 @@ export const main = Reach.App(() => {
     ...Buyer
   });
   const C   = Participant('C', {
-    ...PawnBroker
+    ...Broker
   });
   deploy();
   

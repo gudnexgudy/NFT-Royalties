@@ -8,7 +8,7 @@ exports.Wrapper = class extends React.Component {
     return (
       <div className="App">
         <header className="App-header" id="root">
-          <h1>NFiT, NFT + Finance</h1>
+          <h1>NFT Royalty</h1>
           {content}
         </header>
       </div>
@@ -74,9 +74,9 @@ exports.DeployerOrAttacher = class extends React.Component {
         </p>
         <p>
           <button
-            onClick={() => parent.selectPawnBroker()}
-          >PawnBroker</button>
-          <br /> Attach to the Deployer's contract as a PawnBroker.
+            onClick={() => parent.selectBroker()}
+          >Broker</button>
+          <br /> Attach to the Deployer's contract as a Broker.
         </p>
       </div>
     );
