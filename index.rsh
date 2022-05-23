@@ -41,7 +41,7 @@ export const main = Reach.App(() => {
   const C   = Participant('C', {
     ...Broker
   });
-  deploy();
+  init();
   
   // create new nft, own by A
   A.only(() => {
