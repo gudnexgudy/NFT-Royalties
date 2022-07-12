@@ -8,16 +8,20 @@ import './index.css';
 import {loadStdlib} from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
 // const reach = loadStdlib(process.env);
+import { ALGO_MyAlgoConnect as MyAlgoConnect } from '@reach-sh/stdlib';
 
-const reach = loadStdlib({
+/*const reach = loadStdlib({
   REACH_CONNECTOR_MODE: 'ALGO',
   REACH_DEBUG: 'yes',
-});
+});*/
+
+const reach = loadStdlib('ALGO');
+reach.setWalletFallback(reach.walletFallback({providerEnv: 'TestNet', MyAlgoConnect }));
 
 const {standardUnit} = reach;
 const defaults = {defaultFundAmt: '10', defaultWager: '3', standardUnit};
 
-reach.setProviderByName('TestNet');
+//reach.setProviderByName('TestNet');
 // reach.setProviderByName('MainNet');
 
 class App extends React.Component {
@@ -28,7 +32,7 @@ class App extends React.Component {
   
   async componentDidMount() {
     const now = await reach.getNetworkTime();
-    reach.setQueryLowerBound(reach.sub(now, 2000));
+    reach.setQueryLowerBound(reach.sub(now, 3000));
 
     const acc = await reach.getDefaultAccount();
     const balAtomic = await reach.balanceOf(acc);
