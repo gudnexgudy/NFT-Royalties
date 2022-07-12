@@ -5,8 +5,8 @@ import BuyerViews from './views/BuyerViews';
 import BrokerViews from './views/BrokerViews';
 import {renderDOM, renderView} from './views/render';
 import './index.css';
-import {loadStdlib} from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
+import {loadStdlib} from '@reach-sh/stdlib';
 // const reach = loadStdlib(process.env);
 
 const reach = loadStdlib({
