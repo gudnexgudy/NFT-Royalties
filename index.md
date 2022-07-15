@@ -1,14 +1,15 @@
 # {#nfr} NFT Royalty
 
-NFT Royalty is a command-line and Web-based application that enables three participants (a `seller`, a `buyer` and a 
-`broker`) to trade NFTs for royalty tokens via a Reach Decentralized Application (DApp). 
-Reach programs are built using a Docker container on your computer. 
-This tutorial contains everything you need to know to build and test this application and assumes no prior experience with 
-DApp/blockchain development of any kind. If you need help installing Reach and its prerequisites then get started at 
-our [Quick Installation Guide](##quickstart).
+NFT Royalty is a command-line and Web-based application that enables three participants (a `seller`, a `buyer` and a `broker`) to trade NFTs for royalty tokens via a Reach Decentralized Application (DApp). 
+Reach programs are built using a Docker container on your computer.
 
-NFT Royalty creates a payment plan that compensate creators, enabling the seller and buyer to make a transaction, and 
-then exits.
+NFT Royalty creates a payment plan that compensate creators, enabling the seller and buyer to make a transaction, and then exits.
+
+This tutorial walks through the creation of a simple decentralized application.
+This tutorial contains everything you need to know to build and test this application and assumes no prior experience with DApp/blockchain development of any kind. If you need help installing Reach and its prerequisites then get started at our [Quick Installation Guide](##nfr-2)
+If you want a broad overview before diving in it, we recommend reading [the overview](##overview) first.
+
+If you're ready, click through to the [first step](##nfr-2)!
 
 # {#nfr-1} Learning Objectives
 
