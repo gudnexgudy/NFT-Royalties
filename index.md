@@ -16,7 +16,7 @@ If you're ready, click through to the [first step](##nfr-2)!
 At the end of this tutorial you will be able to:
 
 1. Install and Initialize
-1. Define essential Reach terms.
+1. Scaffolding and Setup.
 1. Build a Reach command-line DApp.
 1. Convert the command-line DApp into a Web-app.
 
@@ -99,7 +99,109 @@ Get language support for Reach in your editor by visiting @{seclink("guide-edito
 Now that your Reach installation is in order, you should open a text editor and get ready to [write your first Reach application](##nfr-3)!
 
 
-# {#nfr-3} Reach Modes
+# {#nfr-3} Scaffolding and Setup
+
+In this tutuorial, we'll be building a version of _NFT Royalty!_ where three participants, _Creator_, _Buyer_ and _Broker_, can wager on the result.
+We'll start simple and slowly mmake the application more fully-featured.
+
+You should follow along by copying each part of the program and seeing how things go.
+If you're like us, you may find it beneficial to type each line out, rather than copying & pasting so you can start building your muscle memory and begin to get a sense for each part of a Reach program.
+
+Let's start by creating a file nammed `index.rsh`.
+It doesn't matter where you put this file, but we recommend putting it in the current directory, which would be `~/reach/nfr` if you're following along exactly.
+In all the subsequent code samples, we'll label the files based on the chapter of the tutorial you're reading.
+For example, start off by typing the following into `index.rsh`:
+
+``` js
+'reach 0.1';
+
+export const main = Reach.App(() => {
+  const Creator = Participant('Creator', {
+    // Specify Creator's interact interface here
+  });
+  const Buyer   = Participant('Buyer', {
+    // Specify Buyer's interact interface here
+  });
+  const Broker   = Participant('Broker', {
+    // Specify Broker's interact interface here
+  });
+  init();
+   // write your program here
+   
+ });  
+  ```
+
+:::note
+Did you notice the attractive copy icon on the top the right of that box?
+You can click on it and the content of the code box will be copied onto your clipboard.
+:::
+
+:::note
+Did your text editor recognize `index.rsh` as a Reach program and give you proper syntax highlighting?
+If not, check if there's a plugin available for your editor by visiting @{seclink("guide-editor-support")} or manually
+configure it to treat Reach (`.rsh`) files as JavaScript and things will be mostly correct.
+:::
+
+This is just a shell of a program that doesn't do much, but it has a few important components.
+
++ Line 1 indicates that this is a Reach program.
+You'll always have this at the top of every program.
++ Line 3 defines the main export from the program.
+When you compile, this is what the compiler will look at.
++ Lines 4 through 12 specify the three participants to this application, _Creator_, _Buyer_, and _Broker_.
++ Line 15 marks the deployment of the the Reach program, which allows the program to start doing things.
+
+Before we go too much further, let's create a similar shell for our JavaScript frontend code.
+Open a new file named `index.mjs` and fill it with this:
+
+`` js
+import { loadStdlib } from '@reach-sh/stdlib';
+import * as backend from './build/index.main.mjs';
+const stdlib = loadStdlib();
+
+const startingBalance = stdlib.parseCurrency(100);
+const accCreator = await stdlib.newTestAccount(startingBalance);
+const accBuyer = await stdlib.newTestAccount(startingBalance);
+const accBroker = await stdlib.newTestAccount(startingBalance);
+
+const ctcCreator = accCreator.contract(backend);
+const ctcBuyer = accBuyer.contract(backend, ctcCreator.getInfo());
+const ctcBroker = accBroker.contract(backend, ctcCreator.getInfo());
+
+await Promise.all([
+  ctcCreator.p.Creator({
+    // implement Creator's interact object here
+  }),
+  ctcBuyer.p.Buyer({
+    // implement Buyer's interact object here
+  }),
+  ctcBroker.p.Broker({
+    // implement Broker's interact object here
+]);
+  ```
+  
+This JavaScript code is similarly schematic and will be consistent across all of your test programs.
+
++ Line 1 imports the Reach standard library loader.
++ Line 2 imports your backend, which `./reach compile` will produce.
++ Line 3 loads the standard library dynamically based on the `REACH_CONNECTOR_MODE` environment variable.
++ Line 5 defines a quantity of network tokens as the starting balance for each test account.
++ Lines 6, 7 and 8 create test accounts with initial endowments for Creator, Buyer and Broker.
+This will only work on the Reach-provided developer testing network.
++ Line 10 has Creator deploy the application.
+
++ Line 11 has Buyer attach to it.
++ Line 12 has Broker attach to it.
++ Lines 13 through 15 initialize a backend for Alice.
++ Lines 16 through 18 initialize a backend for Bob.
++ Line 12 waits for the backends to complete.
+
+This is now enough for Reach to compile and run our program. Let's try by running
+
+```cmd
+$ ./reach run
+```
+  
 
 Reach programs (the `index.rsh` portion of your Reach DApp) are organized into four modes: `Init Mode`, `Step Mode`, `Local 
 Step Mode`, and `Consensus Step Mode`.
@@ -111,6 +213,8 @@ Application Initialization defines participants and views.
 Lines 2, 3 and 4 below occur in the App Init section of the program:
 
 ``` js
+'reach 0.1';
+
 export const main = Reach.App(() => {
   const A = Participant('A', {
     ...Creator,
