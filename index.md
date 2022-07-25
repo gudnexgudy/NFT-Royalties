@@ -154,7 +154,7 @@ When you compile, this is what the compiler will look at.
 Before we go too much further, let's create a similar shell for our JavaScript frontend code.
 Open a new file named `index.mjs` and fill it with this:
 
-`` js
+``` js
 import { loadStdlib } from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
 const stdlib = loadStdlib();
@@ -178,7 +178,7 @@ await Promise.all([
   ctcBroker.p.Broker({
     // implement Broker's interact object here
 ]);
-  ```
+```
   
 This JavaScript code is similarly schematic and will be consistent across all of your test programs.
 
