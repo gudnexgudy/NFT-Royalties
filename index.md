@@ -128,7 +128,8 @@ export const main = Reach.App(() => {
   init();
    // write your program here
    
- });  
+ });
+ range: 1-16
   ```
 
 :::note
@@ -178,6 +179,7 @@ await Promise.all([
   ctcBroker.p.Broker({
     // implement Broker's interact object here
 ]);
+range: 1-23
 ```
   
 This JavaScript code is similarly schematic and will be consistent across all of your test programs.
