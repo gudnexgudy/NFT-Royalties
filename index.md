@@ -116,20 +116,19 @@ For example, start off by typing the following into `index.rsh`:
 'reach 0.1';
 
 export const main = Reach.App(() => {
-  const Creator = Participant('Creator', {
+  const A = Participant('Creator', {
     // Specify Creator's interact interface here
   });
-  const Buyer   = Participant('Buyer', {
+  const B = Participant('Buyer', {
     // Specify Buyer's interact interface here
   });
-  const Broker   = Participant('Broker', {
+  const C = Participant('Broker', {
     // Specify Broker's interact interface here
   });
   init();
    // write your program here
    
  });
- range: 1-16
   ```
 
 :::note
@@ -179,7 +178,6 @@ await Promise.all([
   ctcBroker.p.Broker({
     // implement Broker's interact object here
 ]);
-range: 1-23
 ```
   
 This JavaScript code is similarly schematic and will be consistent across all of your test programs.
@@ -194,16 +192,65 @@ This will only work on the Reach-provided developer testing network.
 
 + Line 11 has Buyer attach to it.
 + Line 12 has Broker attach to it.
-+ Lines 13 through 15 initialize a backend for Alice.
-+ Lines 16 through 18 initialize a backend for Bob.
-+ Line 12 waits for the backends to complete.
++ Lines 16 through 18 initialize a backend for Alice.
++ Lines 19 through 21 initialize a backend for Bob.
++ Line 22 waits for the backends to complete.
 
 This is now enough for Reach to compile and run our program. Let's try by running
 
 ```cmd
 $ ./reach run
 ```
-  
+
+Reach should now build and launch a Docker container for this application.
+Since the application doesn't do anything, you'll just see a lot of diagnostic messages though, so that's not very exciting.
+
+:::note
+The entire process that we just went through can be automated by running
+```cmd
+$ ./reach init
+```
+ when you start your next project!
+:::
+
+In [the next step](##tut-4), we'll implement the logic of _NFT Royalty!_ and our application will start doing something!
+
+::::testQ
+When you write a DApp using Reach, do you
+1. write a smart contract in Solidity, a backend in JavaScript using the Ethereum SDK, and a frontend in JavaScript, then use Reach to test and deploy it;
+1. write a program in Reach that generates a smart contract & a backend and a front-end in JavaScript, then use Reach to test and deploy it?
+
+:::testA
+2; Reach abstracts away the details of the underlying consensus network
+:::
+
+::::
+
+## {#tut-4} NFT Royalty
+
+In this section, we'll have the Creator, the Buyer and the Broker actually implement the _NFT Royalty!_.
+
+We have to decide how to represent the hands of the game.
+A simple way is to represent them as the numbers `{!rsh} 0`, `{!rsh} 1`, and `{!rsh} 2`, standing for `Rock`, `Paper`, and `Scissors`.
+However, Reach does not support unsigned integers of exactly two bits, so it is better to represent them as the equivalence class of integers modulo three, so we won't distinguish between `{!rsh} 0` and `{!rsh} 3` as `Rock`.
+
+We'll use a similar strategy for representing the three outcomes of the game: `B wins`, `Draw`, and `A wins`.
+
+The first step is to change the Reach program to specify that Alice and Bob's frontends can be interacted with to get the move that they will play, and later informed of the outcome of the game.
+
+```
+load: /examples/rps-2-rps/index.rsh
+md5: 3ea7718e88c86dd41e97b503d7aa3b67
+range: 1-17
+```
+
++ Lines 3 through 6 define a participant interact interface that will be shared between the two players.
+In this case, it provides two methods: `{!rsh} getHand`, which returns a number; and `{!rsh} seeOutcome`, which receives a number.
++ Lines 9 through 14 use this interface for both participants.
+Because of this line, `{!rsh} interact` in the rest of the program will be bound to an object with methods corresponding to these actions, which will connect to the frontend of the corresponding participant.
+
+Before continuing with the Reach application, let's move over to the JavaScript interface and implement these methods in our frontend.
+
 
 Reach programs (the `index.rsh` portion of your Reach DApp) are organized into four modes: `Init Mode`, `Step Mode`, `Local 
 Step Mode`, and `Consensus Step Mode`.
@@ -273,10 +320,8 @@ NFT with Royalty requirements:
 1. The `buyer` will need a pay function and a function that displays the purchased NFT.
 1. The `broker` will need a function to hold the price and the NFT to be released to both seller and buyer.
 1. The `seller` will need a function to input the NFT, and to put it up for sale.
-1. Participants will be publishing information: the seller will publish the NFT and the price, the buyer 
-will publish their decision to purchase, and the broker will release it to bothe the seller and buyer.
-1. The `buyer` needs to be able to decide to NOT purchase the wisdom, so we need to create a function for cancelling 
-the sale.
+1. Participants will be publishing information: the seller will publish the NFT and the price, the buyer will publish their decision to purchase, and the broker will release the NFT to the buyer and the price to the seller.
+1. The `buyer` needs to be able to decide to NOT purchase the NFT, so we need to create a function for cancelling the sale.
 1. If the `buyer` does decide to buy the wisdom, then there needs to be a function that reports the payment to both the 
 `seller` and the `buyer`.
 
