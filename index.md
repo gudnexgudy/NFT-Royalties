@@ -1154,4 +1154,6 @@ Now that you've seen an entire Reach application from beginning to end, it's tim
 No matter what you decide to read or work on next, we hope you'll join us on [the Discord community](@{DISCORD}).
 Once you join, message `@team, I just completed the tutorial!` and we'll give you the `tutorial veteran` role, so you can more easily help others work through it!
 
+I will KEEP UPDATING this page for better usage!!
+
 Thanks for spending your evening with us!
