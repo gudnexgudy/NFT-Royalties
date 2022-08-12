@@ -508,194 +508,237 @@ Next, we define callbacks on `{!js} App` for what to do when the user clicks cer
 + On line 37, we define what to do when the user clicks the `Skip` button,
 which is to set the component state to display @{seclink("nfr-9-DeployerOrAttacher")}.
 
-When we combine this with the view ([rps-9-web/views/AppViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AppViews.js)) it will look like:
-![](assets/2.png)
+When we combine this with the view ([nft-royalties/views/AppViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AppViews.js)) it will look like:
+![](assets/13.png)
 
 ### {#nfr-9-DeployerOrAttacher} Choose Role
 
+``` js
+selectCreator() { this.setState({view: 'Wrapper', ContentView: Creator}); }
+  selectBuyer() { this.setState({view: 'Wrapper', ContentView: Buyer}); }
+  selectBroker() { this.setState({view: 'Wrapper', ContentView: Broker}); }
 ```
-load: /examples/rps-9-web/index.js
-md5: 29b1b17df91e1d49053670f72eebc6b4
-range: 37-38
-```
 
-On lines 37 and 38, we set a sub-component
-based on whether the user clicks `Deployer` or `Attacher`.
+On lines 38, 39 and 40, we set a sub-component based on whether the user clicks `Creator`, `Buyer` or `Broker`.
 
-When we combine this with the view ([rps-9-web/views/AppViews.js](@{REPO}/examples/rps-9-web/views/AppViews.js#L56-L78)) it will look like:
-![](./rps-9-web/DeployerOrAttacher.png)
+When we combine this with the view ([nft-royalties/views/AppViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AppViews.js)) it will look like:
+![](assets/10.png)
 
-### {#tut-9-Player} Player component
+### {#nfr-9-Creator} Creator component
 
-Next, we will define `{!js} Player` as a React component,
-that will hold all of the behavior of the players and
-which will be extended by the specialized components for Alice and Bob.
+Next, we will define `{!js} Creator` as a React component, that will hold all of the behavior of the specialized components for Creator, Buyer and Broker.
 
-Our Web frontend needs to implement the participant interact interface for players, which we defined as:
+Our Web frontend needs to implement the participant interact interface for creators, which we defined as:
 
 ``` js
-load: /examples/rps-9-web/index.rsh
-md5: ee287e712cdfe8d91bbb038c383d25d3
-range: 20-25
+const Creator = {
+  getId: Fun([], UInt), 
+  getPrice: Fun([], UInt), 
+  getTax: Fun([], UInt)
+};
 ```
 
 We will provide these callbacks via the React component directly.
 
+``` js
+class Creator extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {view: 'SetInfo'};
+  }
+  setInfo(id, price, tax) { this.setState({view: 'Deploy', id, price, tax}); }
+  getId() {return this.state.id;}
+  getPrice() {return this.state.price;}
+  getTax() {return this.state.tax;}
+
+  async deploy() {
+    const ctc = this.props.acc.deploy(backend);
+    this.setState({view: 'Deploying', ctc});
+    this.id = reach.parseCurrency(this.state.id); // UInt
+    this.price = reach.parseCurrency(this.state.price); // UInt
+    this.tax = reach.parseCurrency(this.state.tax); // UInt
+    backend.A(ctc, this);
+    const ctcInfoStr = JSON.stringify(await ctc.getInfo(), null, 2);
+    this.setState({view: 'WaitingForAttacher', ctcInfoStr});
+  }
+  render() { return renderView(this, CreatorViews); }
+}
 ```
-load: /examples/rps-9-web/index.js
-md5: 29b1b17df91e1d49053670f72eebc6b4
-range: 42-55
-```
 
-+ On line 43, we provide the `{!js} random` callback
-+ On lines 44 thru 50, we provide the `{!js} getHand` callback.
-+ On lines 45 thru 47, we set the component state to display @{seclink("tut-9-GetHand")},
-and wait for a `{!js} Promise` which can be resolved via user interaction.
-+ On line 48, which occurs after the `{!js} Promise` is resolved,
-we set the component state to display @{seclink("tut-9-WaitingForResults")}.
-+ On lines 51 and 52, we provide the `{!js} seeOutcome` and `{!js} informTimeout` callbacks,
-which set the component state to display @{seclink("tut-9-Done")} and @{seclink("tut-9-Timeout")}, respectively.
-+ On line 53, we define what happens when the user clicks `Rock`, `Paper`, or `Scissors`:
-The `{!js} Promise` from line 45 is resolved.
++ On line 65, we provide the `{!js} setInfo` callback
++ On line 66, we provide the `{!js} getId` callback
++ On line 67, we provide the `{!js} getPrice` callback
++ On line 68, we provide the `{!js} getTax` callback
++ On lines 70 thru 79, we provide the `{!js} deploy` callback.
++ On line 76, which occurs after the `{!js} Promise` is resolved, we set the component state to display @{seclink("nfr-9-WaitingForAttacher")}.
 
-### {#tut-9-GetHand} Get Hand dialog
+### {#nfr-9-GetHand} Deploy dialog
 
-The dialog used to get a hand from the player ([rps-9-web/views/PlayerViews.js](@{REPO}/examples/rps-9-web/views/PlayerViews.js#L8-L32)) looks like:
-![](./rps-9-web/GetHand.png)
+The dialog used to get a hand from the player ([nft-royalties/views/AppViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AppViews.js)) looks like:
+![](assets/2.png)
 
 ### {#tut-9-WaitingForResults} Waiting for results display
 
-The dialog used to get a hand from the player ([rps-9-web/views/PlayerViews.js](@{REPO}/examples/rps-9-web/views/PlayerViews.js#L34-L42)) looks like:
-![](./rps-9-web/WaitingForResults.png)
+The dialog used to get a hand from the player ([nft-royalties/views/AppViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AppViews.js)) looks like:
+![](assets/3.png)
 
 ### {#tut-9-Done} Done display
 
-The display when the player sees the end of the game ([rps-9-web/views/PlayerViews.js](@{REPO}/examples/rps-9-web/views/PlayerViews.js#L44-L54)) looks like:
-![](./rps-9-web/Done.png)
-
-### {#tut-9-Timeout} Timeout display
-
-The display when the player sees a timeout ([rps-9-web/views/PlayerViews.js](@{REPO}/examples/rps-9-web/views/PlayerViews.js#L56-L64)) looks like:
-![](./rps-9-web/Timeout.png)
+The display when the player sees the end of the game ([nft-royalties/views/AppViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AppViews.js)) looks like:
+![](assets/5.png)
 
 ### {#tut-9-Deployer} Deployer component
 
-Next, we will define `{!js} Deployer` as a React component for Alice,
-which extends `{!js} Player`.
+Next, we will define `{!js} Deployer` as a React component for A, which extends `{!js} Creator`.
 
-Our Web frontend needs to implement the participant interact interface for Alice, which we defined as:
+Our Web frontend needs to implement the participant interact interface for A, which we defined as:
 
-```
-load: /examples/rps-9-web/index.rsh
-md5: ee287e712cdfe8d91bbb038c383d25d3
-range: 28-32
-```
-
-We will provide the `{!js} wager` and `{!js} deadline` values,
-and define some button handlers in order to trigger the deployment of the contract.
-
-```
-load: /examples/rps-9-web/index.js
-md5: 29b1b17df91e1d49053670f72eebc6b4
-range: 56-72
+``` js
+const A = Participant('A', {
+    ...Creator,
+    id: UInt, // id of NFT
+    price: UInt, // price
+    tax: UInt, // tax
+  });
 ```
 
-+ On line 59, we set the component state to display @{seclink("tut-9-SetWager")}.
-+ On line 61, we define what to do when the user clicks the `Set Wager` button,
+We will provide the `{!js} id`, `{!js} price`, and `{!js} tax` values, and define some button handlers in order to trigger the deployment of the contract.
+
+``` js
+class Creator extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {view: 'SetInfo'};
+  }
+  setInfo(id, price, tax) { this.setState({view: 'Deploy', id, price, tax}); }
+  getId() {return this.state.id;}
+  getPrice() {return this.state.price;}
+  getTax() {return this.state.tax;}
+
+  async deploy() {
+    const ctc = this.props.acc.deploy(backend);
+    this.setState({view: 'Deploying', ctc});
+    this.id = reach.parseCurrency(this.state.id); // UInt
+    this.price = reach.parseCurrency(this.state.price); // UInt
+    this.tax = reach.parseCurrency(this.state.tax); // UInt
+    backend.A(ctc, this);
+    const ctcInfoStr = JSON.stringify(await ctc.getInfo(), null, 2);
+    this.setState({view: 'WaitingForAttacher', ctcInfoStr});
+  }
+  render() { return renderView(this, CreatorViews); }
+}
+```
+
++ On line 59, we set the component state to display @{seclink("tut-9-SetInfo")}.
++ On line 61, we define what to do when the user clicks the `Set Info` button,
 which is to set the component state to display @{seclink("tut-9-Deploy")}.
 + On lines 62 thru 69, we define what to do when the user clicks the `Deploy` button.
 + On line 63, we call `{!js} acc.deploy`, which triggers a deploy of the contract.
 + On line 64, we set the component state to display @{seclink("tut-9-Deploying")}.
-+ On line 65, we set the `{!js} wager` property.
-+ On line 66, we set the `{!js} deadline` property based on which connector is being used.
-+ On line 67, we start running the Reach program as Alice, using the `{!js} this` React component
++ On line 65, we set the `{!js} id` property.
++ On line 66, we set the `{!js} price` property.
++ On line 67, we set the `{!js} tax` property based on which connector is being used.
++ On line 68, we start running the Reach program as A, using the `{!js} this` React component
 as the participant interact interface object.
-+ On lines 68 and 69, we set the component state to display @{seclink("tut-9-WaitingForAttacher")},
++ On lines 69 and 70, we set the component state to display @{seclink("tut-9-WaitingForAttacher")},
 which displays the deployed contract info as JSON.
-+ On line 71, we render the appropriate view from [rps-9-web/views/DeployerViews.js](@{REPO}/examples/rps-9-web/views/DeployerViews.js).
++ On line 72, we render the appropriate view from [nft-royalties/views/DeployerViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/DeployerViews.js).
 
-### {#tut-9-SetWager} Set Wager dialog
+### {#tut-9-SetWager} Set Info dialog
 
-The dialog used to set the wager ([rps-9-web/views/DeployerViews.js](@{REPO}/examples/rps-9-web/views/DeployerViews.js#L20-L38)) looks like:
-![](./rps-9-web/SetWager.png)
+The dialog used to set the wager ([nft-royalties/views/DeployerViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/DeployerViews.js)) looks like:
+![](assets/13.png)
 
 ### {#tut-9-Deploy} Deploy dialog
 
-The dialog used to deploy ([rps-9-web/views/DeployerViews.js](@{REPO}/examples/rps-9-web/views/DeployerViews.js#L40-L53)) looks like:
-![](./rps-9-web/Deploy.png)
+The dialog used to deploy ([nft-royalties/views/DeployerViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/DeployerViews.js)) looks like:
+![](assets/2.png)
 
 ### {#tut-9-Deploying} Deploying display
 
-The display shown while deploying ([rps-9-web/views/DeployerViews.js](@{REPO}/examples/rps-9-web/views/DeployerViews.js#L55-L61)) looks like:
-![](./rps-9-web/Deploying.png)
+The display shown while deploying ([nft-royalties/views/DeployerViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/DeployerViews.js)) looks like:
+![](assets/3.png)
 
 ### {#tut-9-WaitingForAttacher} Waiting for Attacher display
 
-The display shown while waiting for the attacher ([rps-9-web/views/DeployerViews.js](@{REPO}/examples/rps-9-web/views/DeployerViews.js#L63-L90)) looks like:
-![](./rps-9-web/WaitingForAttacher.png)
+The display shown while waiting for the attacher ([nft-royalties/views/DeployerViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/DeployerViews.js)) looks like:
+![](assets/4.png)
 
-### {#tut-9-Attacher} Attacher component
+### {#tut-9-Attacher} Buyer component
 
-Our Web frontend needs to implement the participant interact interface for Bob, which we defined as:
+Our Web frontend needs to implement the participant interact interface for B, which we defined as:
 
-```
-load: /examples/rps-9-web/index.rsh
-md5: ee287e712cdfe8d91bbb038c383d25d3
-range: 33-36
-```
-
-We will provide the `{!js} acceptWager` callback,
-and define some button handlers in order to attach to the deployed contract.
-
-```
-load: /examples/rps-9-web/index.js
-md5: 29b1b17df91e1d49053670f72eebc6b4
-range: 73-95
+``` js
+const B   = Participant('B', {
+    ...Buyer
+  });
 ```
 
-+ On line 76, we initialize the component state to display @{seclink("tut-9-Attach")}.
-+ On lines 78 thru 82, we define what happens when the user clicks the `Attach` button.
-+ On line 79, we call `{!js} acc.attach`
-+ On line 80, we set the component state to display @{seclink("tut-9-Attaching")}.
-+ On line 81, we start running the Reach program as Bob, using the `{!js} this` React component
+We will provide the `{!js} buyer` callback, and define some button handlers in order to attach to the deployed contract.
+
+``` js
+class Buyer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {view: 'Attach'};
+  }
+
+  attach(ctcInfoStr) {
+    const ctc = this.props.acc.attach(backend, JSON.parse(ctcInfoStr));
+    this.setState({view: 'Attaching'});
+    backend.B(ctc, this);
+  }
+
+  async buy(idAtomic, priceAtomic) {
+    console.log(idAtomic, priceAtomic);
+    const id = idAtomic.toNumber();
+    const price = priceAtomic.toNumber();
+    console.log(id, price);
+    return await new Promise(bought => {
+      this.setState({view: 'BuyNFT', id, price, standardUnit, bought});
+    });
+  }
+```
+
++ On line 86, we initialize the component state to display @{seclink("tut-9-Attach")}.
++ On lines 88 thru 92, we define what happens when the user clicks the `Attach` button.
++ On line 89, we call `{!js} acc.attach`
++ On line 90, we set the component state to display @{seclink("tut-9-Attaching")}.
++ On line 91, we start running the Reach program as Bob, using the `{!js} this` React component
 as the participant interact interface object.
-+ On lines 83 thru 88, we define the `{!js} acceptWager` callback.
-+ On lines 85 thru 87, we set the component state to display @{seclink("tut-9-AcceptTerms")},
-and wait for a `{!js} Promise` which can be resolved via user interaction.
-+ On lines 89 thru 92, we define what happens when the user clicks the `Accept Terms and Pay Wager` button:
-the `{!js} Promise` from line 90 is resolved, and we set the component state to display @{seclink("tut-9-WaitingForTurn")}.
-+ On line 93, we render the appropriate view from [rps-9-web/views/AttacherViews.js](@{REPO}/examples/rps-9-web/views/AttacherViews.js)
++ On lines 93 thru 98, we define the `{!js} acceptWager` callback.
++ On lines 95 thru 97, we set the component state to display @{seclink("tut-9-BuyNFT")}, and wait for a `{!js} Promise` which can be resolved via user interaction.
++ On lines 99 thru 102, we define what happens when the user clicks the `Accept Terms and Buy NFT` button:
+the `{!js} Promise` from line 100 is resolved, and we set the component state to display @{seclink("tut-9-WaitingForTurn")}.
++ On line 103, we render the appropriate view from [nft-royalties/views/AttacherViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AttachererViews.js)
 
 ### {#tut-9-Attach} Attach dialog
 
-The dialog used to attach ([rps-9-web/views/AttacherViews.js](@{REPO}/examples/rps-9-web/views/AttacherViews.js#L18-L39)) looks like:
-![](./rps-9-web/Attach.png)
+The dialog used to attach ([nft-royalties/views/AttacherViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AttachererViews.js)) looks like:
+![](assets/14.png)
 
 ### {#tut-9-Attaching} Attaching display
 
-The display when attaching ([rps-9-web/views/AttacherViews.js](@{REPO}/examples/rps-9-web/views/AttacherViews.js#L41-L49)) looks like:
-![](./rps-9-web/Attaching.png)
+The display when attaching ([nft-royalties/views/AttacherViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AttachererViews.js)) looks like:
+![](assets/6.png)
 
-### {#tut-9-AcceptTerms} Accept Terms dialog
+### {#tut-9-AcceptTerms} Buy NFT dialog
 
-The dialog used to accept the terms of the wager ([rps-9-web/views/AttacherViews.js](@{REPO}/examples/rps-9-web/views/AttacherViews.js#L51-L70)) looks like:
-![](./rps-9-web/AcceptTerms.png)
+The dialog used to accept the terms of the wager ([nft-royalties/views/AttacherViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AttachererViews.js)) looks like:
+![](assets/12.png)
 
 ### {#tut-9-WaitingForTurn} Waiting for Turn display
 
-The display when waiting for a turn ([rps-9-web/views/AttacherViews.js](@{REPO}/examples/rps-9-web/views/AttacherViews.js#L72-L81)) looks like:
-![](./rps-9-web/WaitingForTurn.png)
+The display when waiting for a turn ([nft-royalties/views/AttacherViews.js](https://github.com/gudnexgudy/NFT-Royalties/blob/main/views/AttachererViews.js)) looks like:
+![](assets/12.png)
 
 ### {#tut-9-Final} Putting it all together
 
 ```
-load: /examples/rps-9-web/index.js
+load: /NFT-Royalties/blob/main/index.js
 md5: 29b1b17df91e1d49053670f72eebc6b4
-range: 96-96
+range: 174-174
 ```
-
-Finally, we call a small helper function from [rps-9-web/views/render.js](@{REPO}/examples/rps-9-web/views/render.js)
-to render our App component.
 
 ---
 As a convenience for running the React development server,
@@ -809,50 +852,296 @@ True
 
 ::::
 
-## {#tut-10} Onward and Further
-
-Let's review what we've done through this tutorial:
-
-+ In [part one](##tut-1), we saw how Reach can be installed with one command on almost any system without any dependencies beyond what most developers have anyways.
-+ In [part two](##tut-2), we saw how Reach programs have a succinct setup that easily abstracts the details of your chosen consensus network into a couple lines and three key API calls.
-+ In [part three](##tut-3), we saw how Reach allows developers to focus on the business logic of their decentralized application and look past the nitty-gritty details of blockchain interaction and protocol design.
-+ In [part four](##tut-4), we saw that it is just as easy for Reach to deal with tokens and network transactions as it is to deal with data sharing.
-+ In [part five](##tut-5), we introduced you to the Reach [automatic formal verification](##guide-assert) engine and its ability to ensure our program doesn't have entire categories of flaws and security vulnerabilities.
-+ In [part six](##tut-6), we saw how Reach allows you to specify how to deal with [non-participation](##guide-timeout) and protect against funds being locked in contracts.
-+ In [part seven](##tut-7), we saw how Reach can express arbitrary length interactions and how flexible the Reach frontends are to variations in the backend.
-+ In [part eight](##tut-8), we saw how to decouple your Reach program from the Reach standard testing environment and launch an interactive version on a real network.
-+ In [part nine](##tut-9), we saw how to deploy your Reach program as a fully decentralized Web application.
-
-Despite having done so much, this is really just a brief introduction to what is possible with Reach.
-
 How difficult was all this?
 Let's look at the final versions of our programs.
 
 First, let's look at the Reach program:
 
-```
-load: /examples/rps-8-interact/index.rsh
-md5: ee287e712cdfe8d91bbb038c383d25d3
-```
+``` js
+'reach 0.1';
+'use strict';
 
-Next, the JavaScript command-line frontend:
+// Create NFT, set ID, price, and tax
+const Creator = {
+  getId: Fun([], UInt), 
+  getPrice: Fun([], UInt), 
+  getTax: Fun([], UInt)
+};
 
-```
-load: /examples/rps-8-interact/index.mjs
-md5: 9f824fcd58e5fdda4f4761b99093cfdc
+// Buy NFT, total cost
+const Buyer = {
+  buy: Fun([UInt, UInt], Null),
+  pawn: Fun([], Null),
+  redeem: Fun([UInt, UInt, UInt], Null),
+  getPawnPrice: Fun([], UInt),
+  getRedeemPrice: Fun([], UInt),
+  getDuration: Fun([], UInt),
+  getRedeemCost: Fun([], UInt),
+  getCurrentDate: Fun([], UInt),
+  getEndDate: Fun([], UInt)
+};
+
+// Accept pawn, the day of accept, the total fee to pay
+const Broker = {
+  accept: Fun([UInt, UInt, UInt, UInt], Null)
+};
+
+// const NFT = {owner: Address, id: UInt, price: UInt, tax: UInt};
+
+export const main = Reach.App(() => {
+  const A = Participant('A', {
+    ...Creator,
+    id: UInt, // id of NFT
+    price: UInt, // price
+    tax: UInt, // tax
+  });
+  const B   = Participant('B', {
+    ...Buyer
+  });
+  const C   = Participant('C', {
+    ...Broker
+  });
+  init();
+  
+  // create new nft, own by A
+  A.only(() => {
+    const id = declassify(interact.getId());
+    const price = declassify(interact.getPrice());
+    const tax = declassify(interact.getTax());
+  });
+  A.publish(id, price, tax);
+  commit();
+
+  // B buy the nft
+  B.only(() => {
+    interact.buy(id, price);
+  });
+  B.pay(price);
+  transfer(price).to(A);
+  commit();
+
+  // B pawn the nft
+  B.only(() => {
+    interact.pawn();
+    const pawnPrice = declassify(interact.getPawnPrice());
+    const redeemPrice = declassify(interact.getRedeemPrice());
+    const endDate = declassify(interact.getEndDate());
+  });
+  B.publish(pawnPrice, redeemPrice, endDate);
+  commit();
+
+  // C accept pawn, pay to A and B
+  C.only(()=> {
+    interact.accept(id, pawnPrice, redeemPrice, endDate);
+  });
+
+  C.pay(pawnPrice);
+  const res2 = pawnPrice - tax;
+  transfer(tax).to(A);
+  transfer(res2).to(B);
+  commit();
+
+  // B try to redeem NFT
+  B.only(() => {
+    const currentDate = declassify(interact.getCurrentDate());
+    interact.redeem(id, redeemPrice, endDate);
+  });
+  B.publish(currentDate);
+  if (endDate >= currentDate) {
+    const res3 = redeemPrice - tax;
+    commit();
+
+    B.pay(redeemPrice);
+    transfer(tax).to(A);
+    transfer(res3).to(C);
+  }
+  commit();
+});
 ```
 
 And finally, the Web frontend:
 
+``` js
+import React from 'react';
+import AppViews from './views/AppViews';
+import CreatorViews from './views/CreatorViews';
+import BuyerViews from './views/BuyerViews';
+import BrokerViews from './views/BrokerViews';
+import {renderDOM, renderView} from './views/render';
+import './index.css';
+import {loadStdlib} from '@reach-sh/stdlib';
+import * as backend from './build/index.main.mjs';
+// const reach = loadStdlib(process.env);
+import { ALGO_MyAlgoConnect as MyAlgoConnect } from '@reach-sh/stdlib';
+
+/*const reach = loadStdlib({
+  REACH_CONNECTOR_MODE: 'ALGO',
+  REACH_DEBUG: 'yes',
+});*/
+
+const reach = loadStdlib('ALGO');
+reach.setWalletFallback(reach.walletFallback({providerEnv: 'TestNet', MyAlgoConnect }));
+
+const {standardUnit} = reach;
+const defaults = {defaultFundAmt: '10', defaultWager: '3', standardUnit};
+
+//reach.setProviderByName('TestNet');
+// reach.setProviderByName('MainNet');
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {view: 'ConnectAccount', ...defaults};
+  }
+  
+  async componentDidMount() {
+    const now = await reach.getNetworkTime();
+    reach.setQueryLowerBound(reach.sub(now, 3000));
+
+    const acc = await reach.getDefaultAccount();
+    const balAtomic = await reach.balanceOf(acc);
+    const bal = reach.formatCurrency(balAtomic, 4);
+    this.setState({acc, bal});
+    if (await reach.canFundFromFaucet()) {
+      this.setState({view: 'FundAccount'});
+    } else {
+      this.setState({view: 'DeployerOrAttacher'});
+    }
+  }
+
+  async fundAccount(fundAmount) {
+    await reach.fundFromFaucet(this.state.acc, reach.parseCurrency(fundAmount));
+    this.setState({view: 'DeployerOrAttacher'});
+  }
+
+  async skipFundAccount() { this.setState({view: 'DeployerOrAttacher'}); }
+  selectCreator() { this.setState({view: 'Wrapper', ContentView: Creator}); }
+  selectBuyer() { this.setState({view: 'Wrapper', ContentView: Buyer}); }
+  selectBroker() { this.setState({view: 'Wrapper', ContentView: Broker}); }
+  render() { return renderView(this, AppViews); }
+}
+
+class Creator extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {view: 'SetInfo'};
+  }
+  setInfo(id, price, tax) { this.setState({view: 'Deploy', id, price, tax}); }
+  getId() {return this.state.id;}
+  getPrice() {return this.state.price;}
+  getTax() {return this.state.tax;}
+
+  async deploy() {
+    const ctc = this.props.acc.deploy(backend);
+    this.setState({view: 'Deploying', ctc});
+    this.id = reach.parseCurrency(this.state.id); // UInt
+    this.price = reach.parseCurrency(this.state.price); // UInt
+    this.tax = reach.parseCurrency(this.state.tax); // UInt
+    backend.A(ctc, this);
+    const ctcInfoStr = JSON.stringify(await ctc.getInfo(), null, 2);
+    this.setState({view: 'WaitingForAttacher', ctcInfoStr});
+  }
+  render() { return renderView(this, CreatorViews); }
+}
+
+class Buyer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {view: 'Attach'};
+  }
+
+  attach(ctcInfoStr) {
+    const ctc = this.props.acc.attach(backend, JSON.parse(ctcInfoStr));
+    this.setState({view: 'Attaching'});
+    backend.B(ctc, this);
+  }
+
+  async buy(idAtomic, priceAtomic) {
+    console.log(idAtomic, priceAtomic);
+    const id = idAtomic.toNumber();
+    const price = priceAtomic.toNumber();
+    console.log(id, price);
+    return await new Promise(bought => {
+      this.setState({view: 'BuyNFT', id, price, standardUnit, bought});
+    });
+  }
+
+  buyIt() {
+    console.log("buy it");
+    this.state.bought();
+  }
+
+  async pawn() {
+    return await new Promise(pawned => {
+      this.setState({view: 'Pawn', standardUnit, pawned});
+    });
+  }
+
+  pawnIt(pawnPrice, redeemPrice, endDate) {
+    this.setState({view: 'WaitingForPawn', pawnPrice, redeemPrice, endDate});
+    this.state.pawned();
+  }
+
+  async redeem(id, redeemPriceAtomic, endDateAtomic) {
+    console.log("redeem in");
+    const redeemPrice = redeemPriceAtomic.toNumber();
+    const endDate = endDateAtomic.toNumber();
+    return await new Promise(redeemed => {
+      this.setState({view: 'Redeem', id, standardUnit,  redeemPrice, endDate, redeemed});
+    });
+  }
+
+  redeemIt(id) {
+    this.state.redeemed();
+    this.setState({view: 'RedeemSuccess', id});
+  }
+
+  getPawnPrice()   { return this.state.pawnPrice };
+  getRedeemPrice() { return this.state.redeemPrice };
+  getEndDate()     { return this.state.endDate };
+  getCurrentDate() { return 0 };
+
+  render() { return renderView(this, BuyerViews); }
+}
+
+class Broker extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {view: 'Attach'};
+  }
+  
+  attach(ctcInfoStr) {
+    const ctc = this.props.acc.attach(backend, JSON.parse(ctcInfoStr));
+    this.setState({view: 'Attaching'});
+    backend.C(ctc, this);
+  }
+
+  async accept(idAtomic, pawnPriceAtomic, redeemPriceAtomic, endDateAtomic) { // Fun([UInt], Null)
+    console.log("start accept");
+    const id = idAtomic.toNumber();
+    const pawnPrice = pawnPriceAtomic.toNumber();
+    const redeemPrice = redeemPriceAtomic.toNumber();
+    const endDate = endDateAtomic.toNumber();
+    return await new Promise(accepted => {
+      this.setState({view: 'acceptPawn', id, pawnPrice, redeemPrice, endDate, accepted});
+    });
+  }
+  
+  acceptIt() {
+    this.state.accepted();
+    this.setState({view: 'WaitingForRedeem'});
+  }
+
+  render() { return renderView(this, BrokerViews); }
+}
+
+renderDOM(<App />);
 ```
-load: /examples/rps-9-web/index.js
-md5: 29b1b17df91e1d49053670f72eebc6b4
-```
+
 
 We wrote about a hundred lines of Reach and two different frontends.
 Our command-line version is about a hundred lines of JavaScript, while our Web version is about the same length, but has a lot of presentation code as well.
 
-Behind the scenes, Reach generated hundreds of lines of Solidity (which you can look at here: [`rps-8-interact/build/index.main.sol`](@{REPO}/examples/rps-8-interact/build/index.main.sol)), almost two thousand lines of TEAL (which you can look at here: [`rps-8-interact/build/index.main.appApproval.teal`](@{REPO}/examples/rps-8-interact/build/index.main.appApproval.teal)), as well as over a thousand lines of JavaScript (which you can look at here: [`rps-8-interact/build/index.main.mjs`](@{REPO}/examples/rps-8-interact/build/index.main.mjs)).
 If we weren't using Reach, then we'd have to write all this code ourselves and ensure that they are consistent and updated at every change to the application.
 
 Now that you've seen an entire Reach application from beginning to end, it's time for you to start working on your own applications!
@@ -865,4 +1154,4 @@ Now that you've seen an entire Reach application from beginning to end, it's tim
 No matter what you decide to read or work on next, we hope you'll join us on [the Discord community](@{DISCORD}).
 Once you join, message `@team, I just completed the tutorial!` and we'll give you the `tutorial veteran` role, so you can more easily help others work through it!
 
-Thanks for spending your afternoon with us!
+Thanks for spending your evening with us!
